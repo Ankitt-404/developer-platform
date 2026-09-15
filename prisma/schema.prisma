@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {     
+  id     String    @id @default(uuid())    
+  username   String   @unique
+  email       String    @unique
+  password    String
+
+  createdAt   DateTime    @default(now())
+  updatedAt     DateTime  @updatedAt
+  profile   Profile?
+  projects   Project[]
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  bio       String?
+  githubUrl String?
+  linkedinUrl String?
+  websiteUrl String?
+
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  githubUrl   String?
+  liveUrl     String?
+
+  repository  String?
+  branch      String     @default("main")
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  analyses    Analysis[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Analysis{
+  id      String      @id @default(uuid())
+  projectId   String  
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  score       Int
+  issues      Int
+  security    Int
+  complexity  Int
+  duplication Int
+  issueList     Issue[]
+  aiReviews       AiReview[]
+
+  createdAt   DateTime  @default(now())
+}
+
+model Issue {
+  id    String    @id @default(uuid())
+
+  analysisId  String 
+  analysis    Analysis   @relation(fields: [analysisId], references : [id], onDelete: Cascade)
+  file        String  
+  line Int
+  type    String 
+  message   String
+  severity    String 
+
+  createdAt  DateTime   @default(now())
+}
+
+model AiReview{
+  id      String       @id @default(uuid())
+  analysisId    String
+  analysis      Analysis   @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+
+  file    String 
+  summary   String
+
+  issues    AIissue[]
+
+  createdAt   DateTime    @default(now())
+}
+
+model AIissue{
+  id      String      @id  @default(uuid())
+  reviewId    String
+  review    AiReview    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  severity    String 
+  category    String
+  title       String
+  description String
+  line          Int?
+  recommendation  String
+  suggestedFix    String?
+
+  createdAt     DateTime     @default(now())
+}

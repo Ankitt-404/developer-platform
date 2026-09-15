@@ -1,0 +1,13 @@
+import express from "express";
+import authRoutes from "./routes/auth.routes.js";
+const app = express();
+app.use(express.json());
+app.get("/", (_req, res) => {
+    res.json({
+        success: true,
+        message: "Developer Platform API is running 🚀"
+    });
+});
+app.use("/api/v1/auth", authRoutes);
+export default app;
+//# sourceMappingURL=index.js.map
